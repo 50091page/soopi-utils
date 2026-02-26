@@ -1,4 +1,4 @@
-import { RowSwapGrid, type RowPair } from "../../components/RowSwapGrid";
+﻿import { RowSwapGrid, type RowPair } from "../../components/RowSwapGrid";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { shuffleSwapRows } from "../../utils/shuffleSwap";
 
@@ -70,7 +70,7 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
 
   return (
     <RowSwapGrid
-      title="PUBG 랜덤 팀 섞기"
+      title="PUBG 팀 섞기"
       lockGuide="티어를 클릭하면 고정됩니다."
       shuffleCount={state.shuffleCount ?? 0}
       rows={PUBG_ROWS}
@@ -84,3 +84,4 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
     />
   );
 }
+

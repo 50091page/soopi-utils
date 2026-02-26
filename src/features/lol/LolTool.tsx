@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { RowSwapGrid, type RowPair } from "../../components/RowSwapGrid";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { shuffleSwapRows } from "../../utils/shuffleSwap";
@@ -119,7 +119,7 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
   return (
     <>
       <RowSwapGrid
-        title="LoL 랜덤 팀 섞기"
+        title="LoL 팀 섞기"
         lockGuide="포지션을 클릭하면 고정됩니다."
         shuffleCount={state.shuffleCount ?? 0}
         useTeamTint={true}
@@ -143,3 +143,4 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
     </>
   );
 }
+

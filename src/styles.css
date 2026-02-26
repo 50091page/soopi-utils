@@ -57,22 +57,9 @@ body {
   margin-bottom: 16px;
   padding: 12px 14px;
   border-radius: 16px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: blur(4px);
-}
-
-.brand-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.page-title {
-  margin: 0;
-  font-size: clamp(1.34rem, 1.08rem + 1.05vw, 1.95rem);
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .header-controls {
@@ -82,66 +69,19 @@ body {
   flex-wrap: wrap;
 }
 
-.theme-switch-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
+.theme-image-toggle {
   border: none;
-  border-radius: 999px;
-  padding: 8px 10px;
-  box-shadow: var(--shadow);
+  background: transparent;
+  padding: 0;
+  border-radius: 12px;
+  cursor: pointer;
 }
 
-.theme-switch-text {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.theme-switch-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.theme-switch-slider {
-  position: relative;
-  width: 46px;
-  height: 26px;
-  background: #bfcde2;
-  border-radius: 999px;
-  border: 1px solid #aebcd2;
-  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.theme-switch-slider::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  transition: transform 0.18s ease;
-}
-
-.theme-switch-input:checked + .theme-switch-slider {
-  background: #0d2a4f;
-  border-color: #2f6dbe;
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.22);
-}
-
-.theme-switch-input:checked + .theme-switch-slider::after {
-  transform: translateX(20px);
-}
-
-.theme-switch-input:focus + .theme-switch-slider {
-  outline: none;
+.theme-image-toggle-img {
+  display: block;
+  height: 38px;
+  width: auto;
+  object-fit: contain;
 }
 
 .tool-grid {
@@ -368,8 +308,12 @@ label {
 
   .name-input,
   .btn,
-  .theme-switch-row {
+  .theme-image-toggle {
     min-height: 44px;
     font-size: 1rem;
+  }
+
+  .theme-image-toggle-img {
+    height: 42px;
   }
 }
