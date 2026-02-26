@@ -7,11 +7,13 @@ const PUBG_ROWS = ["1티어", "2티어", "3티어", "4티어"];
 type PubgState = {
   values: RowPair[];
   locks: boolean[];
+  shuffleCount: number;
 };
 
 const createDefaultState = (): PubgState => ({
   values: PUBG_ROWS.map(() => ({ left: "", right: "" })),
   locks: PUBG_ROWS.map(() => false),
+  shuffleCount: 0,
 });
 
 type PubgToolProps = {
@@ -44,6 +46,7 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
   const onShuffle = () => {
     setState((prev) => ({
       ...prev,
+      shuffleCount: (prev.shuffleCount ?? 0) + 1,
       values: shuffleSwapRows(
         prev.values.map((pair, index) => ({ ...pair, locked: prev.locks[index] })),
         allowEmptySwap
@@ -51,7 +54,14 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
     }));
   };
 
-  const onClearInputs = () => {
+  const onResetCount = () => {
+    setState((prev) => ({
+      ...prev,
+      shuffleCount: 0,
+    }));
+  };
+
+  const onClearMembers = () => {
     setState((prev) => ({
       ...prev,
       values: prev.values.map(() => ({ left: "", right: "" })),
@@ -61,13 +71,16 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
   return (
     <RowSwapGrid
       title="PUBG 랜덤 팀 섞기"
+      lockGuide="티어를 클릭하면 고정됩니다."
+      shuffleCount={state.shuffleCount ?? 0}
       rows={PUBG_ROWS}
       values={state.values}
       locks={state.locks}
       onValueChange={onValueChange}
       onLockChange={onLockChange}
       onShuffle={onShuffle}
-      onClearInputs={onClearInputs}
+      onResetCount={onResetCount}
+      onClearMembers={onClearMembers}
     />
   );
 }

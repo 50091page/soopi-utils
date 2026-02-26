@@ -8,11 +8,13 @@ const LOL_ROWS = ["탑", "정글", "미드", "원딜", "서폿"];
 type LolState = {
   values: RowPair[];
   locks: boolean[];
+  shuffleCount: number;
 };
 
 const createDefaultState = (): LolState => ({
   values: LOL_ROWS.map(() => ({ left: "", right: "" })),
   locks: LOL_ROWS.map(() => false),
+  shuffleCount: 0,
 });
 
 type LolToolProps = {
@@ -92,6 +94,7 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
   const onShuffle = () => {
     setState((prev) => ({
       ...prev,
+      shuffleCount: (prev.shuffleCount ?? 0) + 1,
       values: shuffleSwapRows(
         prev.values.map((pair, index) => ({ ...pair, locked: prev.locks[index] })),
         allowEmptySwap
@@ -99,7 +102,14 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
     }));
   };
 
-  const onClearInputs = () => {
+  const onResetCount = () => {
+    setState((prev) => ({
+      ...prev,
+      shuffleCount: 0,
+    }));
+  };
+
+  const onClearMembers = () => {
     setState((prev) => ({
       ...prev,
       values: prev.values.map(() => ({ left: "", right: "" })),
@@ -110,6 +120,9 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
     <>
       <RowSwapGrid
         title="LoL 랜덤 팀 섞기"
+        lockGuide="포지션을 클릭하면 고정됩니다."
+        shuffleCount={state.shuffleCount ?? 0}
+        useTeamTint={true}
         rows={LOL_ROWS}
         values={state.values}
         locks={state.locks}
@@ -118,7 +131,8 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
         onValueChange={onValueChange}
         onLockChange={onLockChange}
         onShuffle={onShuffle}
-        onClearInputs={onClearInputs}
+        onResetCount={onResetCount}
+        onClearMembers={onClearMembers}
         extraAction={{ label: "복사하기", onClick: copyRows }}
       />
       {showCopyToast ? (

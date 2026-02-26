@@ -4,10 +4,19 @@ export type SwapRow = {
   locked: boolean;
 };
 
+function secureRandomUnit(): number {
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return arr[0] / 4294967296;
+  }
+
+  return Math.random();
+}
+
 export function shuffleSwapRows(
   rows: SwapRow[],
-  allowEmptySwap: boolean,
-  random: () => number = Math.random
+  allowEmptySwap: boolean
 ): SwapRow[] {
   return rows.map((row) => {
     if (row.locked) {
@@ -20,7 +29,7 @@ export function shuffleSwapRows(
       return row;
     }
 
-    if (random() < 0.5) {
+    if (secureRandomUnit() < 0.5) {
       return {
         ...row,
         left: row.right,
