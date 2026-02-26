@@ -26,27 +26,36 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
     "soopi-utils.lol.state",
     createDefaultState()
   );
-  const [showCopyToast, setShowCopyToast] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  const animationIntervalRef = useRef<number | null>(null);
+  const animationTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
       if (toastTimerRef.current !== null) {
         window.clearTimeout(toastTimerRef.current);
       }
+      if (animationIntervalRef.current !== null) {
+        window.clearInterval(animationIntervalRef.current);
+      }
+      if (animationTimeoutRef.current !== null) {
+        window.clearTimeout(animationTimeoutRef.current);
+      }
     };
   }, []);
 
-  const showCopiedNotice = () => {
-    setShowCopyToast(false);
+  const showNotice = (message: string) => {
+    setToastMessage(null);
     if (toastTimerRef.current !== null) {
       window.clearTimeout(toastTimerRef.current);
     }
 
     requestAnimationFrame(() => {
-      setShowCopyToast(true);
+      setToastMessage(message);
       toastTimerRef.current = window.setTimeout(() => {
-        setShowCopyToast(false);
+        setToastMessage(null);
       }, 1400);
     });
   };
@@ -63,7 +72,7 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
 
     try {
       await navigator.clipboard.writeText(text);
-      showCopiedNotice();
+      showNotice("복사가 되었습니다.");
       return;
     } catch {
       const textarea = document.createElement("textarea");
@@ -75,7 +84,7 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
       textarea.select();
       document.execCommand("copy");
       document.body.removeChild(textarea);
-      showCopiedNotice();
+      showNotice("복사가 되었습니다.");
     }
   };
 
@@ -97,14 +106,45 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
   };
 
   const onShuffle = () => {
-    setState((prev) => ({
-      ...prev,
-      shuffleCount: (prev.shuffleCount ?? 0) + 1,
-      values: shuffleSwapRows(
-        prev.values.map((pair, index) => ({ ...pair, locked: prev.locks[index] })),
-        allowEmptySwap
-      ).map(({ left, right }) => ({ left, right })),
-    }));
+    if (isShuffling) {
+      return;
+    }
+
+    const finalValues = shuffleSwapRows(
+      state.values.map((pair, index) => ({ ...pair, locked: state.locks[index] })),
+      allowEmptySwap
+    ).map(({ left, right }) => ({ left, right }));
+
+    setIsShuffling(true);
+
+    animationIntervalRef.current = window.setInterval(() => {
+      setState((prev) => ({
+        ...prev,
+        values: prev.values.map((pair, index) => {
+          if (prev.locks[index]) {
+            return pair;
+          }
+          if (Math.random() < 0.5) {
+            return { left: pair.right, right: pair.left };
+          }
+          return pair;
+        }),
+      }));
+    }, 80);
+
+    animationTimeoutRef.current = window.setTimeout(() => {
+      if (animationIntervalRef.current !== null) {
+        window.clearInterval(animationIntervalRef.current);
+        animationIntervalRef.current = null;
+      }
+      setState((prev) => ({
+        ...prev,
+        shuffleCount: (prev.shuffleCount ?? 0) + 1,
+        values: finalValues,
+      }));
+      setIsShuffling(false);
+      animationTimeoutRef.current = null;
+    }, 820);
   };
 
   const onResetCount = () => {
@@ -125,8 +165,10 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
     <>
       <RowSwapGrid
         title="LoL 팀 섞기"
+        variant="lol"
         lockGuide="포지션을 클릭하면 고정됩니다."
         shuffleCount={state.shuffleCount ?? 0}
+        isBusy={isShuffling}
         useTeamTint={true}
         rows={LOL_ROWS}
         values={state.values}
@@ -140,9 +182,9 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
         onClearMembers={onClearMembers}
         extraAction={{ label: "복사하기", onClick: copyRows }}
       />
-      {showCopyToast ? (
+      {toastMessage ? (
         <div className="toast-notice" role="status" aria-live="polite">
-          복사가 되었습니다.
+          {toastMessage}
         </div>
       ) : null}
     </>
