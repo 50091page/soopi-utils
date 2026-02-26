@@ -11,6 +11,9 @@
   --shadow: 0 16px 36px rgba(20, 32, 64, 0.12);
   --radius-card: 18px;
   --radius-row: 12px;
+  --motion-fast: 180ms;
+  --motion-base: 200ms;
+  --motion-slow: 220ms;
 }
 
 :root[data-theme="dark"] {
@@ -86,6 +89,14 @@ body {
   cursor: pointer;
 }
 
+.theme-image-toggle:focus {
+  outline: none;
+}
+
+.theme-image-toggle:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
 .theme-image-stack {
   position: relative;
   display: block;
@@ -120,14 +131,52 @@ body {
   border-radius: var(--radius-card);
   padding: 16px 16px 14px;
   box-shadow: var(--shadow);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color var(--motion-base) ease,
+    box-shadow var(--motion-base) ease,
+    transform var(--motion-base) ease;
+}
+
+.tool-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  opacity: 0.9;
+}
+
+.tool-card-lol {
+  background: var(--surface);
+}
+
+.tool-card-lol::before {
+  background: linear-gradient(90deg, #378fff 0%, #125fd0 100%);
+}
+
+.tool-card-pubg {
+  background: var(--surface);
+}
+
+.tool-card-pubg::before {
+  background: linear-gradient(90deg, #f6a044 0%, #d77a1d 100%);
 }
 
 .tool-card.is-busy {
+  --busy-color: #5ea2ff;
+  --busy-rgb: 94, 162, 255;
   cursor: progress;
   position: relative;
   overflow: hidden;
-  animation: busy-glow 0.72s ease-in-out infinite;
+  animation: busy-glow var(--busy-duration, 820ms) ease-out 1;
+}
+
+.tool-card-pubg.is-busy {
+  --busy-color: #ff9a3d;
+  --busy-rgb: 255, 154, 61;
 }
 
 .tool-card.is-busy::after {
@@ -137,18 +186,20 @@ body {
   background: linear-gradient(
     110deg,
     transparent 0%,
-    rgba(94, 162, 255, 0.14) 45%,
-    rgba(94, 162, 255, 0.22) 52%,
-    rgba(94, 162, 255, 0.14) 59%,
+    rgba(var(--busy-rgb), 0.24) 44%,
+    rgba(var(--busy-rgb), 0.52) 52%,
+    rgba(var(--busy-rgb), 0.24) 60%,
     transparent 100%
   );
   transform: translateX(-120%);
-  animation: busy-sweep 0.95s linear infinite;
+  animation: busy-sweep var(--busy-duration, 820ms) ease-out 1;
   pointer-events: none;
 }
 
 .tool-card:hover {
   border-color: color-mix(in srgb, var(--accent) 26%, var(--border));
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(20, 32, 64, 0.16);
 }
 
 .tool-card-head {
@@ -202,11 +253,15 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-row);
   padding: 8px;
-  transition: background-color 0.16s ease, border-color 0.16s ease;
+  transition:
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    transform var(--motion-fast) ease;
 }
 
 .row-item:hover {
   border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+  transform: translateY(-1px);
 }
 
 .row-item.is-locked {
@@ -242,7 +297,11 @@ body {
   border-radius: 8px;
   padding: 6px 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    transform var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
 .row-lock-toggle:hover {
@@ -253,6 +312,12 @@ body {
 
 .row-lock-toggle:focus {
   outline: none;
+}
+
+.row-lock-toggle:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .row-lock-toggle:active {
@@ -275,6 +340,12 @@ body {
   margin-left: 2px;
 }
 
+:root[data-theme="dark"] .lock-pill {
+  color: #d8e9ff;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 72%, var(--border));
+}
+
 .name-input {
   width: 100%;
   border-radius: 10px;
@@ -283,7 +354,10 @@ body {
   color: var(--text);
   padding: 10px 12px;
   font-size: 0.95rem;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
 .name-input.team-blue {
@@ -320,17 +394,21 @@ body {
 }
 
 :root[data-theme="dark"] .duplicate-guide {
-  color: #ffbf74;
+  color: #ffd7a4;
 }
 
 :root[data-theme="dark"] .name-input.is-duplicate {
-  border-color: rgba(255, 190, 98, 0.9);
-  background: rgba(255, 190, 98, 0.14);
+  border-color: rgba(255, 205, 130, 0.96);
+  background: rgba(255, 205, 130, 0.2);
 }
 
 .name-input:focus,
 .btn:focus {
   outline: none;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .name-input:focus-visible {
@@ -372,12 +450,21 @@ label {
 .btn {
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface-strong) 56%, var(--surface));
   color: var(--text);
   padding: 10px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: transform 0.08s ease, filter 0.08s ease, background-color 0.12s ease;
+  transition:
+    transform var(--motion-fast) ease,
+    filter var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-fast) ease;
 }
 
 .btn:active {
@@ -394,21 +481,54 @@ label {
 }
 
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, #378fff 0%, #125fd0 100%);
+  border-color: #2f7fe6;
   color: #fff;
-  min-width: 72px;
+  width: 84px;
   text-align: center;
+  box-shadow: 0 8px 18px rgba(22, 119, 255, 0.26);
 }
 
 .btn.primary:hover {
-  background: var(--accent-strong);
+  filter: brightness(1.06);
 }
+
+.btn.accent {
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: color-mix(in srgb, var(--accent-strong) 82%, var(--text));
+}
+
+.btn.accent:hover {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+}
+
+.btn:not(.primary):not(.danger):not(.accent):hover {
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+  background: color-mix(in srgb, var(--surface-strong) 80%, var(--surface));
+}
+
+.tool-card-pubg .btn.primary {
+  background: linear-gradient(135deg, #f6a044 0%, #d77a1d 100%);
+  border-color: #e2872d;
+  box-shadow: 0 8px 18px rgba(226, 135, 45, 0.28);
+}
+
+.tool-card-pubg .btn.primary:hover {
+  filter: brightness(1.06);
+}
+
 
 .btn.danger {
   color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
-  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--border));
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+}
+
+.btn.danger:hover {
+  border-color: color-mix(in srgb, var(--danger) 68%, var(--border));
+  background: color-mix(in srgb, var(--danger) 17%, var(--surface));
 }
 
 .toast-notice {
@@ -451,24 +571,24 @@ label {
 @keyframes busy-glow {
   0% {
     box-shadow:
-      0 0 0 rgba(94, 162, 255, 0),
-      0 0 0 rgba(94, 162, 255, 0),
+      0 0 0 rgba(var(--busy-rgb), 0),
+      0 0 0 rgba(var(--busy-rgb), 0),
       var(--shadow);
-    border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+    border-color: color-mix(in srgb, var(--busy-color) 46%, var(--border));
   }
   50% {
     box-shadow:
-      0 0 0 4px rgba(94, 162, 255, 0.22),
-      0 0 24px rgba(94, 162, 255, 0.28),
+      0 0 0 7px rgba(var(--busy-rgb), 0.35),
+      0 0 40px rgba(var(--busy-rgb), 0.52),
       var(--shadow);
-    border-color: color-mix(in srgb, var(--accent) 62%, var(--border));
+    border-color: color-mix(in srgb, var(--busy-color) 84%, var(--border));
   }
   100% {
     box-shadow:
-      0 0 0 rgba(94, 162, 255, 0),
-      0 0 0 rgba(94, 162, 255, 0),
+      0 0 0 rgba(var(--busy-rgb), 0),
+      0 0 0 rgba(var(--busy-rgb), 0),
       var(--shadow);
-    border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+    border-color: color-mix(in srgb, var(--busy-color) 46%, var(--border));
   }
 }
 
@@ -480,6 +600,7 @@ label {
     transform: translateX(120%);
   }
 }
+
 
 @media (max-width: 900px) {
   .tool-grid {
@@ -500,6 +621,15 @@ label {
 
   .row-item {
     grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .row-label {
+    min-height: 0;
+    padding: 0 2px 7px;
+    margin-bottom: 1px;
+    border-bottom: 1px dashed color-mix(in srgb, var(--border) 72%, transparent);
   }
 
   .name-input,

@@ -49,7 +49,7 @@ function App() {
         <LolTool />
         <PubgTool />
       </main>
-    </div>
+      </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 
 export type RowPair = {
   left: string;
@@ -17,10 +17,12 @@ type RowSwapGridProps = {
   useTeamTint?: boolean;
   leftPlaceholder?: string;
   rightPlaceholder?: string;
-  extraAction?: {
+  busyDurationMs?: number;
+  secondaryActions?: Array<{
     label: string;
+    tone?: "default" | "accent";
     onClick: () => void;
-  };
+  }>;
   onValueChange: (index: number, side: "left" | "right", value: string) => void;
   onLockChange: (index: number, value: boolean) => void;
   onShuffle: () => void;
@@ -40,7 +42,8 @@ export function RowSwapGrid({
   useTeamTint = false,
   leftPlaceholder = "",
   rightPlaceholder = "",
-  extraAction,
+  busyDurationMs = 820,
+  secondaryActions,
   onValueChange,
   onLockChange,
   onShuffle,
@@ -74,7 +77,10 @@ export function RowSwapGrid({
   );
 
   return (
-    <section className={`tool-card tool-card-${variant}${isBusy ? " is-busy" : ""}`}>
+      <section
+      className={`tool-card tool-card-${variant}${isBusy ? " is-busy" : ""}`}
+      style={{ "--busy-duration": `${busyDurationMs}ms` } as CSSProperties}
+    >
       <div className="tool-card-head">
         <h2>{title}</h2>
       </div>
@@ -89,7 +95,6 @@ export function RowSwapGrid({
                 className={`row-lock-toggle${locks[index] ? " is-locked" : ""}`}
                 onClick={() => onLockChange(index, !locks[index])}
                 aria-pressed={locks[index]}
-                tabIndex={-1}
                 disabled={isBusy}
               >
                 <span>{label}</span>
@@ -147,11 +152,17 @@ export function RowSwapGrid({
           <button type="button" className="btn" onClick={onResetCount} disabled={isBusy}>
             초기화
           </button>
-          {extraAction ? (
-            <button type="button" className="btn" onClick={extraAction.onClick} disabled={isBusy}>
-              {extraAction.label}
+          {secondaryActions?.map((action) => (
+            <button
+              type="button"
+              className={`btn${action.tone === "accent" ? " accent" : ""}`}
+              onClick={action.onClick}
+              disabled={isBusy}
+              key={action.label}
+            >
+              {action.label}
             </button>
-          ) : null}
+          ))}
           <button type="button" className="btn danger" onClick={onClearMembers} disabled={isBusy}>
             지우기
           </button>

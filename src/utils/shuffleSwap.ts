@@ -16,7 +16,8 @@ function secureRandomUnit(): number {
 
 export function shuffleSwapRows(
   rows: SwapRow[],
-  allowEmptySwap: boolean
+  allowEmptySwap: boolean,
+  randomUnit: () => number = secureRandomUnit
 ): SwapRow[] {
   return rows.map((row) => {
     if (row.locked) {
@@ -29,7 +30,7 @@ export function shuffleSwapRows(
       return row;
     }
 
-    if (secureRandomUnit() < 0.5) {
+    if (randomUnit() < 0.5) {
       return {
         ...row,
         left: row.right,

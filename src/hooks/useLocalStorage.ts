@@ -1,21 +1,46 @@
 import { useEffect, useState } from "react";
 
-export function useLocalStorage<T>(key: string, initialValue: T) {
+type UseLocalStorageOptions<T> = {
+  legacyKeys?: string[];
+  migrate?: (value: unknown) => T;
+};
+
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T,
+  options?: UseLocalStorageOptions<T>
+) {
   const [state, setState] = useState<T>(() => {
     if (typeof window === "undefined") {
       return initialValue;
     }
 
-    const stored = window.localStorage.getItem(key);
-    if (!stored) {
-      return initialValue;
+    const parseStoredValue = (stored: string | null): T | null => {
+      if (!stored) {
+        return null;
+      }
+
+      try {
+        const parsed = JSON.parse(stored) as unknown;
+        return options?.migrate ? options.migrate(parsed) : (parsed as T);
+      } catch {
+        return null;
+      }
+    };
+
+    const directValue = parseStoredValue(window.localStorage.getItem(key));
+    if (directValue !== null) {
+      return directValue;
     }
 
-    try {
-      return JSON.parse(stored) as T;
-    } catch {
-      return initialValue;
+    for (const legacyKey of options?.legacyKeys ?? []) {
+      const legacyValue = parseStoredValue(window.localStorage.getItem(legacyKey));
+      if (legacyValue !== null) {
+        return legacyValue;
+      }
     }
+
+    return initialValue;
   });
 
   useEffect(() => {

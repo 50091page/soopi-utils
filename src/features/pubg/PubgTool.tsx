@@ -1,160 +1,34 @@
-import { useEffect, useRef, useState } from "react";
-import { RowSwapGrid, type RowPair } from "../../components/RowSwapGrid";
-import { useLocalStorage } from "../../hooks/useLocalStorage";
-import { shuffleSwapRows } from "../../utils/shuffleSwap";
+import { RowSwapGrid } from "../../components/RowSwapGrid";
+import { useSwapTool } from "../../hooks/useSwapTool";
 
 const PUBG_ROWS = ["1티어", "2티어", "3티어", "4티어"];
-
-type PubgState = {
-  values: RowPair[];
-  locks: boolean[];
-  shuffleCount: number;
-};
-
-const createDefaultState = (): PubgState => ({
-  values: PUBG_ROWS.map(() => ({ left: "", right: "" })),
-  locks: PUBG_ROWS.map(() => false),
-  shuffleCount: 0,
-});
 
 type PubgToolProps = {
   allowEmptySwap?: boolean;
 };
 
 export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
-  const [state, setState] = useLocalStorage<PubgState>(
-    "soopi-utils.pubg.state",
-    createDefaultState()
-  );
-  const [isShuffling, setIsShuffling] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const toastTimerRef = useRef<number | null>(null);
-  const animationIntervalRef = useRef<number | null>(null);
-  const animationTimeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current !== null) {
-        window.clearTimeout(toastTimerRef.current);
-      }
-      if (animationIntervalRef.current !== null) {
-        window.clearInterval(animationIntervalRef.current);
-      }
-      if (animationTimeoutRef.current !== null) {
-        window.clearTimeout(animationTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const showNotice = (message: string) => {
-    setToastMessage(null);
-    if (toastTimerRef.current !== null) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-
-    requestAnimationFrame(() => {
-      setToastMessage(message);
-      toastTimerRef.current = window.setTimeout(() => {
-        setToastMessage(null);
-      }, 1400);
-    });
-  };
-
-  const copyRows = async () => {
-    const text = state.values
-      .map((pair) => `${pair.left.trim() || "왼쪽팀"} vs ${pair.right.trim() || "오른쪽팀"}`)
-      .join("\n");
-
-    try {
-      await navigator.clipboard.writeText(text);
-      showNotice("복사가 되었습니다.");
-      return;
-    } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.setAttribute("readonly", "true");
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      showNotice("복사가 되었습니다.");
-    }
-  };
-
-  const onValueChange = (index: number, side: "left" | "right", value: string) => {
-    setState((prev) => {
-      const nextValues = [...prev.values];
-      const row = nextValues[index] ?? { left: "", right: "" };
-      nextValues[index] = { ...row, [side]: value };
-      return { ...prev, values: nextValues };
-    });
-  };
-
-  const onLockChange = (index: number, value: boolean) => {
-    setState((prev) => {
-      const nextLocks = [...prev.locks];
-      nextLocks[index] = value;
-      return { ...prev, locks: nextLocks };
-    });
-  };
-
-  const onShuffle = () => {
-    if (isShuffling) {
-      return;
-    }
-
-    const finalValues = shuffleSwapRows(
-      state.values.map((pair, index) => ({ ...pair, locked: state.locks[index] })),
-      allowEmptySwap
-    ).map(({ left, right }) => ({ left, right }));
-
-    setIsShuffling(true);
-
-    animationIntervalRef.current = window.setInterval(() => {
-      setState((prev) => ({
-        ...prev,
-        values: prev.values.map((pair, index) => {
-          if (prev.locks[index]) {
-            return pair;
-          }
-          if (Math.random() < 0.5) {
-            return { left: pair.right, right: pair.left };
-          }
-          return pair;
-        }),
-      }));
-    }, 80);
-
-    animationTimeoutRef.current = window.setTimeout(() => {
-      if (animationIntervalRef.current !== null) {
-        window.clearInterval(animationIntervalRef.current);
-        animationIntervalRef.current = null;
-      }
-      setState((prev) => ({
-        ...prev,
-        shuffleCount: (prev.shuffleCount ?? 0) + 1,
-        values: finalValues,
-      }));
-      setIsShuffling(false);
-      animationTimeoutRef.current = null;
-    }, 820);
-  };
-
-  const onResetCount = () => {
-    setState((prev) => ({
-      ...prev,
-      shuffleCount: 0,
-    }));
-  };
-
-  const onClearMembers = () => {
-    setState((prev) => ({
-      ...prev,
-      values: prev.values.map(() => ({ left: "", right: "" })),
-    }));
-  };
+  const {
+    values,
+    locks,
+    shuffleCount,
+    isShuffling,
+    toastMessage,
+    busyDurationMs,
+    onValueChange,
+    onLockChange,
+    onShuffle,
+    onResetCount,
+    onClearMembers,
+    onCopyRows,
+  } = useSwapTool({
+    storageKey: "shuffle.pubg.state.v2",
+    legacyKeys: ["shuffle.pubg.state", "soopi-utils.pubg.state"],
+    rows: PUBG_ROWS,
+    allowEmptySwap,
+    leftFallback: "왼쪽팀",
+    rightFallback: "오른쪽팀",
+  });
 
   return (
     <>
@@ -162,17 +36,20 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
         title="PUBG 팀 섞기"
         variant="pubg"
         lockGuide="티어를 클릭하면 고정됩니다."
-        shuffleCount={state.shuffleCount ?? 0}
+        shuffleCount={shuffleCount}
         isBusy={isShuffling}
+        busyDurationMs={busyDurationMs}
         rows={PUBG_ROWS}
-        values={state.values}
-        locks={state.locks}
+        values={values}
+        locks={locks}
         onValueChange={onValueChange}
         onLockChange={onLockChange}
         onShuffle={onShuffle}
         onResetCount={onResetCount}
         onClearMembers={onClearMembers}
-        extraAction={{ label: "복사하기", onClick: copyRows }}
+        secondaryActions={[
+          { label: "복사하기", tone: "accent", onClick: onCopyRows },
+        ]}
       />
       {toastMessage ? (
         <div className="toast-notice" role="status" aria-live="polite">
