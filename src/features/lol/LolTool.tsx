@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RowSwapGrid, type RowPair } from "../../components/RowSwapGrid";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { shuffleSwapRows } from "../../utils/shuffleSwap";
@@ -52,9 +52,14 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
   };
 
   const copyRows = async () => {
-    const text = state.values
-      .map((pair) => `${pair.left.trim() || "블루팀"} vs ${pair.right.trim() || "레드팀"}`)
-      .join("\n");
+    const leftNames = state.values.map((pair) => pair.left.trim() || "블루팀");
+    const rightNames = state.values.map((pair) => pair.right.trim() || "레드팀");
+    const leftWidth = Math.max("블루팀".length, ...leftNames.map((name) => name.length));
+
+    const lines = leftNames.map((leftName, index) => {
+      return `${leftName.padEnd(leftWidth, " ")}\t${rightNames[index]}`;
+    });
+    const text = lines.join("\n");
 
     try {
       await navigator.clipboard.writeText(text);

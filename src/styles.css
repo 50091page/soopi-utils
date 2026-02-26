@@ -51,11 +51,11 @@ body {
 
 .app-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-  padding: 12px 14px;
+  padding: 12px 0;
   border-radius: 16px;
   border: none;
   background: transparent;
@@ -77,11 +77,25 @@ body {
   cursor: pointer;
 }
 
-.theme-image-toggle-img {
+.theme-image-stack {
+  position: relative;
   display: block;
+  width: 90px;
   height: 38px;
-  width: auto;
+}
+
+.theme-image-toggle-img {
+  position: absolute;
+  inset: 0;
+  height: 38px;
+  width: 100%;
   object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.theme-image-toggle-img.is-visible {
+  opacity: 1;
 }
 
 .tool-grid {
@@ -314,6 +328,11 @@ label {
   }
 
   .theme-image-toggle-img {
+    height: 42px;
+  }
+
+  .theme-image-stack {
+    width: 96px;
     height: 42px;
   }
 }

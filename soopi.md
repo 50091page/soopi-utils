@@ -1,4 +1,4 @@
-﻿# soopi-utils — 스트리머 유틸 2종 (LoL / PUBG) React 구현 + GitHub Pages 배포 (Codex용)
+# soopi-utils — 스트리머 유틸 2종 (LoL / PUBG) React 구현 + GitHub Pages 배포 (Codex용)
 
 ## 0) 목표
 스트리머가 방송 중 빠르게 사용할 수 있는 팀 섞기 유틸 2종을 **React + Vite**로 구현하고, **GitHub Pages**에 배포한다.
