@@ -207,7 +207,7 @@ body {
   align-items: center;
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px dashed color-mix(in srgb, var(--border) 82%, transparent);
+  border-bottom: none;
 }
 
 .tool-card h2 {
@@ -218,11 +218,17 @@ body {
 }
 
 .tool-card-lol h2 {
-  color: #165fc6;
+  color: #0f4fae;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .tool-card-pubg h2 {
   color: #c76b13;
+}
+
+:root[data-theme="dark"] .tool-card-lol h2 {
+  color: #9ac6ff;
+  text-shadow: 0 1px 0 rgba(5, 10, 20, 0.55);
 }
 
 .lock-guide {
