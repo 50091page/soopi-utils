@@ -254,6 +254,8 @@ label {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  min-width: 72px;
+  text-align: center;
 }
 
 .btn.primary:hover {
