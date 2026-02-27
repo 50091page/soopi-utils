@@ -1,9 +1,6 @@
 import { useMemo, type CSSProperties } from "react";
-
-export type RowPair = {
-  left: string;
-  right: string;
-};
+import { buildNormalizedNameCounts, hasDuplicateNames, isDuplicateName } from "../utils/nameDuplicates";
+import type { RowPair } from "../types/swap";
 
 type RowSwapGridProps = {
   title: string;
@@ -52,24 +49,9 @@ export function RowSwapGrid({
 }: RowSwapGridProps) {
   const shuffleLabel = isBusy ? "섞는 중..." : shuffleCount > 0 ? String(shuffleCount) : "돌리기";
 
-  const normalizedCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    values.forEach((row) => {
-      [row.left, row.right].forEach((name) => {
-        const normalized = name.trim().toLowerCase();
-        if (!normalized) {
-          return;
-        }
-        counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
-      });
-    });
-    return counts;
-  }, [values]);
+  const normalizedCounts = useMemo(() => buildNormalizedNameCounts(values), [values]);
 
-  const hasDuplicates = useMemo(
-    () => Array.from(normalizedCounts.values()).some((count) => count > 1),
-    [normalizedCounts]
-  );
+  const hasDuplicates = useMemo(() => hasDuplicateNames(normalizedCounts), [normalizedCounts]);
 
   const indexedRows = useMemo(
     () => rows.map((row, index) => ({ label: row, index })),
@@ -104,7 +86,7 @@ export function RowSwapGrid({
 
             <input
               className={`name-input${useTeamTint ? " team-blue" : ""}${
-                (normalizedCounts.get((values[index]?.left ?? "").trim().toLowerCase()) ?? 0) > 1
+                isDuplicateName(normalizedCounts, values[index]?.left ?? "")
                   ? " is-duplicate"
                   : (values[index]?.left ?? "").trim()
                     ? " is-filled"
@@ -112,17 +94,16 @@ export function RowSwapGrid({
               }`}
               value={values[index]?.left ?? ""}
               placeholder={leftPlaceholder}
+              aria-label={`${label} ${leftPlaceholder || "왼쪽팀"} 이름`}
               disabled={isBusy}
               aria-invalid={
-                (normalizedCounts.get((values[index]?.left ?? "").trim().toLowerCase()) ?? 0) > 1
-                  ? true
-                  : undefined
+                isDuplicateName(normalizedCounts, values[index]?.left ?? "") ? true : undefined
               }
               onChange={(event) => onValueChange(index, "left", event.target.value)}
             />
             <input
               className={`name-input${useTeamTint ? " team-red" : ""}${
-                (normalizedCounts.get((values[index]?.right ?? "").trim().toLowerCase()) ?? 0) > 1
+                isDuplicateName(normalizedCounts, values[index]?.right ?? "")
                   ? " is-duplicate"
                   : (values[index]?.right ?? "").trim()
                     ? " is-filled"
@@ -130,11 +111,10 @@ export function RowSwapGrid({
               }`}
               value={values[index]?.right ?? ""}
               placeholder={rightPlaceholder}
+              aria-label={`${label} ${rightPlaceholder || "오른쪽팀"} 이름`}
               disabled={isBusy}
               aria-invalid={
-                (normalizedCounts.get((values[index]?.right ?? "").trim().toLowerCase()) ?? 0) > 1
-                  ? true
-                  : undefined
+                isDuplicateName(normalizedCounts, values[index]?.right ?? "") ? true : undefined
               }
               onChange={(event) => onValueChange(index, "right", event.target.value)}
             />

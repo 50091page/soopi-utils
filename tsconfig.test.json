@@ -10,5 +10,5 @@
     "rootDir": ".",
     "noEmit": false
   },
-  "include": ["src/utils/shuffleSwap.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

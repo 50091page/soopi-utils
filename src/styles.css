@@ -38,13 +38,6 @@ body {
   font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
   color: var(--text);
   background:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(20, 36, 72, 0.022) 0px,
-      rgba(20, 36, 72, 0.022) 1px,
-      transparent 1px,
-      transparent 12px
-    ),
     radial-gradient(circle at 8% 8%, rgba(40, 110, 220, 0.15), transparent 35%),
     radial-gradient(circle at 85% 10%, rgba(35, 186, 175, 0.12), transparent 33%),
     var(--bg);

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { SHUFFLE_ANIMATION_MS } from "../constants/shuffle";
-import { useLocalStorage } from "./useLocalStorage";
-import { shuffleSwapRows } from "../utils/shuffleSwap";
-import type { RowPair } from "../components/RowSwapGrid";
+import { SHUFFLE_ANIMATION_MS } from "../constants/shuffle.js";
+import { useLocalStorage } from "./useLocalStorage.js";
+import { shuffleSwapRows } from "../utils/shuffleSwap.js";
+import type { RowPair } from "../types/swap.js";
 
 type SwapToolState = {
   values: RowPair[];
@@ -19,14 +19,14 @@ type UseSwapToolOptions = {
   rightFallback: string;
 };
 
-const createDefaultState = (rows: string[]): SwapToolState => ({
+export const createDefaultSwapToolState = (rows: string[]): SwapToolState => ({
   values: rows.map(() => ({ left: "", right: "" })),
   locks: rows.map(() => false),
   shuffleCount: 0,
 });
 
-function migrateState(value: unknown, rows: string[]): SwapToolState {
-  const defaults = createDefaultState(rows);
+export function migrateSwapToolState(value: unknown, rows: string[]): SwapToolState {
+  const defaults = createDefaultSwapToolState(rows);
   if (!value || typeof value !== "object") {
     return defaults;
   }
@@ -48,7 +48,7 @@ function migrateState(value: unknown, rows: string[]): SwapToolState {
   };
 }
 
-function formatRowsForCopy(
+export function formatRowsForCopy(
   values: RowPair[],
   leftFallback: string,
   rightFallback: string
@@ -68,9 +68,9 @@ export function useSwapTool({
   leftFallback,
   rightFallback,
 }: UseSwapToolOptions) {
-  const [state, setState] = useLocalStorage<SwapToolState>(storageKey, createDefaultState(rows), {
+  const [state, setState] = useLocalStorage<SwapToolState>(storageKey, createDefaultSwapToolState(rows), {
     legacyKeys,
-    migrate: (value) => migrateState(value, rows),
+    migrate: (value) => migrateSwapToolState(value, rows),
   });
   const [isShuffling, setIsShuffling] = useState(false);
   const [animatedValues, setAnimatedValues] = useState<RowPair[] | null>(null);

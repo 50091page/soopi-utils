@@ -56,11 +56,9 @@ function runFairnessDistributionTest() {
   assert(ratio > 0.49 && ratio < 0.51, `Swap ratio should be near 50%. got=${ratio.toFixed(4)}`);
 }
 
-function runAllTests() {
+export function runShuffleSwapTests() {
   runLockPreservationTest();
   runEmptySwapGuardTest();
   runFairnessDistributionTest();
   console.log("shuffleSwap tests passed");
 }
-
-runAllTests();

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { safeLocalStorageGet, safeLocalStorageSet } from "../utils/storage.js";
 
 type UseLocalStorageOptions<T> = {
   legacyKeys?: string[];
@@ -28,13 +29,13 @@ export function useLocalStorage<T>(
       }
     };
 
-    const directValue = parseStoredValue(window.localStorage.getItem(key));
+    const directValue = parseStoredValue(safeLocalStorageGet(key));
     if (directValue !== null) {
       return directValue;
     }
 
     for (const legacyKey of options?.legacyKeys ?? []) {
-      const legacyValue = parseStoredValue(window.localStorage.getItem(legacyKey));
+      const legacyValue = parseStoredValue(safeLocalStorageGet(legacyKey));
       if (legacyValue !== null) {
         return legacyValue;
       }
@@ -43,9 +44,32 @@ export function useLocalStorage<T>(
     return initialValue;
   });
 
+  const saveTimerRef = useRef<number | null>(null);
+  const latestStateRef = useRef(state);
+  latestStateRef.current = state;
+
   useEffect(() => {
-    window.localStorage.setItem(key, JSON.stringify(state));
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = window.setTimeout(() => {
+      safeLocalStorageSet(key, JSON.stringify(state));
+      saveTimerRef.current = null;
+    }, 200);
+
+    return () => {
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current);
+      }
+    };
   }, [key, state]);
+
+  useEffect(() => {
+    return () => {
+      safeLocalStorageSet(key, JSON.stringify(latestStateRef.current));
+    };
+  }, [key]);
 
   return [state, setState] as const;
 }
