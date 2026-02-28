@@ -143,20 +143,6 @@ body {
   }
 }
 
-@keyframes theme-toggle-pulse {
-  0% {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  20% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.08);
-  }
-}
-
 
 .theme-image-toggle {
   position: relative;
@@ -165,17 +151,6 @@ body {
   padding: 0;
   border-radius: 14px;
   cursor: pointer;
-}
-
-.theme-image-toggle::after {
-  content: "";
-  position: absolute;
-  inset: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
-  opacity: 0;
-  animation: theme-toggle-pulse 2s ease-out infinite;
-  pointer-events: none;
 }
 
 .theme-image-toggle:focus {
@@ -257,6 +232,185 @@ body {
 
 .tool-card-pubg::before {
   background: linear-gradient(90deg, #f6a044 0%, #d77a1d 100%);
+}
+
+.menu-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  transition:
+    transform var(--motion-base) ease,
+    border-color var(--motion-base) ease,
+    box-shadow var(--motion-base) ease,
+    filter var(--motion-base) ease;
+}
+
+:root[data-theme="dark"] .menu-card {
+  border-color: rgba(71, 85, 105, 0.9);
+  background: rgba(30, 41, 59, 0.85);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.menu-card-active {
+  border-color: #bae6fd;
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 55%, #ecfeff 100%);
+}
+
+:root[data-theme="dark"] .menu-card-active {
+  border-color: rgba(94, 165, 255, 0.6);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.96) 0%, rgba(30, 41, 59, 0.92) 55%, rgba(12, 74, 110, 0.3) 100%);
+}
+
+.menu-card-comingSoon {
+  border-color: rgba(226, 232, 240, 0.8);
+  background: rgba(241, 245, 249, 0.72);
+  opacity: 0.65;
+  filter: saturate(0.75);
+}
+
+:root[data-theme="dark"] .menu-card-comingSoon {
+  border-color: rgba(51, 65, 85, 0.72);
+  background: rgba(30, 41, 59, 0.45);
+}
+
+.menu-card-clickable {
+  cursor: pointer;
+}
+
+.menu-card-clickable:hover {
+  transform: translateY(-4px);
+  border-color: #cbd5e1;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.14);
+}
+
+:root[data-theme="dark"] .menu-card-clickable:hover {
+  border-color: #64748b;
+}
+
+.menu-card-disabled {
+  cursor: not-allowed;
+}
+
+.menu-card-order {
+  pointer-events: none;
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  font-size: 52px;
+  line-height: 1;
+  font-weight: 900;
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .menu-card-order {
+  color: #334155;
+}
+
+.menu-card-tag {
+  display: inline-flex;
+  border-radius: 999px;
+  border: 1px solid;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.menu-card-tag-active {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #0369a1;
+}
+
+:root[data-theme="dark"] .menu-card-tag-active {
+  border-color: rgba(96, 165, 250, 0.7);
+  background: rgba(12, 74, 110, 0.35);
+  color: #bae6fd;
+}
+
+.menu-card-tag-comingSoon {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .menu-card-tag-comingSoon {
+  border-color: #64748b;
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.menu-card-title {
+  margin: 12px 0 0;
+  max-width: 86%;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.menu-card-title-active {
+  color: #1e293b;
+}
+
+:root[data-theme="dark"] .menu-card-title-active {
+  color: #f1f5f9;
+}
+
+.menu-card-title-comingSoon {
+  color: #334155;
+}
+
+:root[data-theme="dark"] .menu-card-title-comingSoon {
+  color: #cbd5e1;
+}
+
+.menu-card-description {
+  margin: 8px 0 0;
+  max-width: 88%;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.menu-card-description-active {
+  color: #475569;
+}
+
+:root[data-theme="dark"] .menu-card-description-active {
+  color: #cbd5e1;
+}
+
+.menu-card-description-comingSoon {
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .menu-card-description-comingSoon {
+  color: #94a3b8;
+}
+
+.menu-card-deco-image {
+  pointer-events: none;
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  opacity: 0.95;
+  user-select: none;
+}
+
+.menu-card-soon-text {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .menu-card-soon-text {
+  color: #64748b;
 }
 
 .menu-chip {

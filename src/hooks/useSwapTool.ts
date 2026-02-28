@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { SHUFFLE_ANIMATION_MS } from "../constants/shuffle.js";
 import { useLocalStorage } from "./useLocalStorage.js";
+import { useShuffleAnimation } from "./useShuffleAnimation.js";
+import { useToastNotice } from "./useToastNotice.js";
 import { shuffleSwapRows } from "../utils/shuffleSwap.js";
 import type { RowPair } from "../types/swap.js";
 
@@ -72,37 +73,8 @@ export function useSwapTool({
     legacyKeys,
     migrate: (value) => migrateSwapToolState(value, rows),
   });
-  const [isShuffling, setIsShuffling] = useState(false);
-  const [animatedValues, setAnimatedValues] = useState<RowPair[] | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const toastTimerRef = useRef<number | null>(null);
-  const animationIntervalRef = useRef<number | null>(null);
-  const animationTimeoutRef = useRef<number | null>(null);
-  const isShufflingRef = useRef(false);
-
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current !== null) {
-        window.clearTimeout(toastTimerRef.current);
-      }
-      stopShuffleAnimation();
-      isShufflingRef.current = false;
-    };
-  }, []);
-
-  const showNotice = (message: string) => {
-    setToastMessage(null);
-    if (toastTimerRef.current !== null) {
-      window.clearTimeout(toastTimerRef.current);
-    }
-
-    requestAnimationFrame(() => {
-      setToastMessage(message);
-      toastTimerRef.current = window.setTimeout(() => {
-        setToastMessage(null);
-      }, 1400);
-    });
-  };
+  const { toastMessage, showNotice } = useToastNotice();
+  const { isShuffling, animatedValues, startShuffleAnimation } = useShuffleAnimation();
 
   const onValueChange = (index: number, side: "left" | "right", value: string) => {
     setState((prev) => {
@@ -121,53 +93,8 @@ export function useSwapTool({
     });
   };
 
-  const stopShuffleAnimation = () => {
-    if (animationIntervalRef.current !== null) {
-      window.clearInterval(animationIntervalRef.current);
-      animationIntervalRef.current = null;
-    }
-    if (animationTimeoutRef.current !== null) {
-      window.clearTimeout(animationTimeoutRef.current);
-      animationTimeoutRef.current = null;
-    }
-  };
-
-  const finishShuffleAnimation = (nextValues: RowPair[]) => {
-    stopShuffleAnimation();
-    setState((prev) => ({
-      ...prev,
-      shuffleCount: (prev.shuffleCount ?? 0) + 1,
-      values: nextValues,
-    }));
-    setAnimatedValues(null);
-    setIsShuffling(false);
-    isShufflingRef.current = false;
-  };
-
-  const startShuffleAnimation = (baseValues: RowPair[], baseLocks: boolean[], finalValues: RowPair[]) => {
-    setAnimatedValues(baseValues.map((pair) => ({ ...pair })));
-    animationIntervalRef.current = window.setInterval(() => {
-      setAnimatedValues((prev) => {
-        const source = prev ?? baseValues;
-        return source.map((pair, index) => {
-          if (baseLocks[index]) {
-            return pair;
-          }
-          if (Math.random() < 0.5) {
-            return { left: pair.right, right: pair.left };
-          }
-          return pair;
-        });
-      });
-    }, 80);
-
-    animationTimeoutRef.current = window.setTimeout(() => {
-      finishShuffleAnimation(finalValues);
-    }, SHUFFLE_ANIMATION_MS);
-  };
-
   const onShuffle = () => {
-    if (isShufflingRef.current || isShuffling) {
+    if (isShuffling) {
       return;
     }
 
@@ -178,9 +105,19 @@ export function useSwapTool({
       allowEmptySwap
     ).map(({ left, right }) => ({ left, right }));
 
-    isShufflingRef.current = true;
-    setIsShuffling(true);
-    startShuffleAnimation(baseValues, baseLocks, finalValues);
+    startShuffleAnimation({
+      baseValues,
+      baseLocks,
+      finalValues,
+      durationMs: SHUFFLE_ANIMATION_MS,
+      onFinish: (nextValues) => {
+        setState((prev) => ({
+          ...prev,
+          shuffleCount: (prev.shuffleCount ?? 0) + 1,
+          values: nextValues,
+        }));
+      },
+    });
   };
 
   const onResetCount = () => {
