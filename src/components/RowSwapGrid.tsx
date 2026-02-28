@@ -2,6 +2,48 @@ import { useMemo, type CSSProperties } from "react";
 import { buildNormalizedNameCounts, hasDuplicateNames, isDuplicateName } from "../utils/nameDuplicates";
 import type { RowPair } from "../types/swap";
 
+type ActionTone = "default" | "accent" | "danger";
+
+type GridAction = {
+  label: string;
+  tone?: ActionTone;
+  onClick: () => void;
+};
+
+type NameInputProps = {
+  sideClassName: string;
+  value: string;
+  rowLabel: string;
+  placeholder: string;
+  isBusy: boolean;
+  isDuplicate: boolean;
+  onChange: (value: string) => void;
+};
+
+function NameInput({
+  sideClassName,
+  value,
+  rowLabel,
+  placeholder,
+  isBusy,
+  isDuplicate,
+  onChange,
+}: NameInputProps) {
+  const stateClass = isDuplicate ? " is-duplicate" : value.trim() ? " is-filled" : " is-empty";
+
+  return (
+    <input
+      className={`name-input${sideClassName}${stateClass}`}
+      value={value}
+      placeholder={placeholder}
+      aria-label={`${rowLabel} ${placeholder || "팀"} 이름`}
+      disabled={isBusy}
+      aria-invalid={isDuplicate ? true : undefined}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  );
+}
+
 type RowSwapGridProps = {
   title: string;
   variant?: "lol" | "pubg";
@@ -15,11 +57,7 @@ type RowSwapGridProps = {
   leftPlaceholder?: string;
   rightPlaceholder?: string;
   busyDurationMs?: number;
-  secondaryActions?: Array<{
-    label: string;
-    tone?: "default" | "accent";
-    onClick: () => void;
-  }>;
+  secondaryActions?: GridAction[];
   onValueChange: (index: number, side: "left" | "right", value: string) => void;
   onLockChange: (index: number, value: boolean) => void;
   onShuffle: () => void;
@@ -47,7 +85,7 @@ export function RowSwapGrid({
   onResetCount,
   onClearMembers,
 }: RowSwapGridProps) {
-  const shuffleLabel = isBusy ? "섞는 중..." : shuffleCount > 0 ? String(shuffleCount) : "돌리기";
+  const shuffleLabel = isBusy ? "섞는 중..." : shuffleCount > 0 ? `돌리기 (${shuffleCount})` : "돌리기";
 
   const normalizedCounts = useMemo(() => buildNormalizedNameCounts(values), [values]);
 
@@ -57,9 +95,17 @@ export function RowSwapGrid({
     () => rows.map((row, index) => ({ label: row, index })),
     [rows]
   );
+  const utilityActions = useMemo<GridAction[]>(
+    () => [
+      { label: "초기화", tone: "default", onClick: onResetCount },
+      ...(secondaryActions ?? []),
+      { label: "지우기", tone: "danger", onClick: onClearMembers },
+    ],
+    [onClearMembers, onResetCount, secondaryActions]
+  );
 
   return (
-      <section
+    <section
       className={`tool-card tool-card-${variant}${isBusy ? " is-busy" : ""}`}
       style={{ "--busy-duration": `${busyDurationMs}ms` } as CSSProperties}
     >
@@ -84,39 +130,23 @@ export function RowSwapGrid({
               </button>
             </div>
 
-            <input
-              className={`name-input${useTeamTint ? " team-blue" : ""}${
-                isDuplicateName(normalizedCounts, values[index]?.left ?? "")
-                  ? " is-duplicate"
-                  : (values[index]?.left ?? "").trim()
-                    ? " is-filled"
-                    : " is-empty"
-              }`}
+            <NameInput
+              sideClassName={useTeamTint ? " team-blue" : ""}
               value={values[index]?.left ?? ""}
-              placeholder={leftPlaceholder}
-              aria-label={`${label} ${leftPlaceholder || "왼쪽팀"} 이름`}
-              disabled={isBusy}
-              aria-invalid={
-                isDuplicateName(normalizedCounts, values[index]?.left ?? "") ? true : undefined
-              }
-              onChange={(event) => onValueChange(index, "left", event.target.value)}
+              rowLabel={label}
+              placeholder={leftPlaceholder || "왼쪽팀"}
+              isBusy={isBusy}
+              isDuplicate={isDuplicateName(normalizedCounts, values[index]?.left ?? "")}
+              onChange={(value) => onValueChange(index, "left", value)}
             />
-            <input
-              className={`name-input${useTeamTint ? " team-red" : ""}${
-                isDuplicateName(normalizedCounts, values[index]?.right ?? "")
-                  ? " is-duplicate"
-                  : (values[index]?.right ?? "").trim()
-                    ? " is-filled"
-                    : " is-empty"
-              }`}
+            <NameInput
+              sideClassName={useTeamTint ? " team-red" : ""}
               value={values[index]?.right ?? ""}
-              placeholder={rightPlaceholder}
-              aria-label={`${label} ${rightPlaceholder || "오른쪽팀"} 이름`}
-              disabled={isBusy}
-              aria-invalid={
-                isDuplicateName(normalizedCounts, values[index]?.right ?? "") ? true : undefined
-              }
-              onChange={(event) => onValueChange(index, "right", event.target.value)}
+              rowLabel={label}
+              placeholder={rightPlaceholder || "오른쪽팀"}
+              isBusy={isBusy}
+              isDuplicate={isDuplicateName(normalizedCounts, values[index]?.right ?? "")}
+              onChange={(value) => onValueChange(index, "right", value)}
             />
           </div>
         ))}
@@ -129,13 +159,12 @@ export function RowSwapGrid({
           </button>
         </div>
         <div className="btn-group btn-group-secondary">
-          <button type="button" className="btn" onClick={onResetCount} disabled={isBusy}>
-            초기화
-          </button>
-          {secondaryActions?.map((action) => (
+          {utilityActions.map((action) => (
             <button
               type="button"
-              className={`btn${action.tone === "accent" ? " accent" : ""}`}
+              className={`btn${
+                action.tone === "accent" ? " accent" : action.tone === "danger" ? " danger" : ""
+              }`}
               onClick={action.onClick}
               disabled={isBusy}
               key={action.label}
@@ -143,9 +172,6 @@ export function RowSwapGrid({
               {action.label}
             </button>
           ))}
-          <button type="button" className="btn danger" onClick={onClearMembers} disabled={isBusy}>
-            지우기
-          </button>
         </div>
       </div>
     </section>

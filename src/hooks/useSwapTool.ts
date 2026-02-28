@@ -78,18 +78,15 @@ export function useSwapTool({
   const toastTimerRef = useRef<number | null>(null);
   const animationIntervalRef = useRef<number | null>(null);
   const animationTimeoutRef = useRef<number | null>(null);
+  const isShufflingRef = useRef(false);
 
   useEffect(() => {
     return () => {
       if (toastTimerRef.current !== null) {
         window.clearTimeout(toastTimerRef.current);
       }
-      if (animationIntervalRef.current !== null) {
-        window.clearInterval(animationIntervalRef.current);
-      }
-      if (animationTimeoutRef.current !== null) {
-        window.clearTimeout(animationTimeoutRef.current);
-      }
+      stopShuffleAnimation();
+      isShufflingRef.current = false;
     };
   }, []);
 
@@ -124,21 +121,31 @@ export function useSwapTool({
     });
   };
 
-  const onShuffle = () => {
-    if (isShuffling) {
-      return;
+  const stopShuffleAnimation = () => {
+    if (animationIntervalRef.current !== null) {
+      window.clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
     }
+    if (animationTimeoutRef.current !== null) {
+      window.clearTimeout(animationTimeoutRef.current);
+      animationTimeoutRef.current = null;
+    }
+  };
 
-    const baseValues = state.values;
-    const baseLocks = state.locks;
-    const finalValues = shuffleSwapRows(
-      baseValues.map((pair, index) => ({ ...pair, locked: baseLocks[index] })),
-      allowEmptySwap
-    ).map(({ left, right }) => ({ left, right }));
+  const finishShuffleAnimation = (nextValues: RowPair[]) => {
+    stopShuffleAnimation();
+    setState((prev) => ({
+      ...prev,
+      shuffleCount: (prev.shuffleCount ?? 0) + 1,
+      values: nextValues,
+    }));
+    setAnimatedValues(null);
+    setIsShuffling(false);
+    isShufflingRef.current = false;
+  };
 
-    setIsShuffling(true);
+  const startShuffleAnimation = (baseValues: RowPair[], baseLocks: boolean[], finalValues: RowPair[]) => {
     setAnimatedValues(baseValues.map((pair) => ({ ...pair })));
-
     animationIntervalRef.current = window.setInterval(() => {
       setAnimatedValues((prev) => {
         const source = prev ?? baseValues;
@@ -155,19 +162,25 @@ export function useSwapTool({
     }, 80);
 
     animationTimeoutRef.current = window.setTimeout(() => {
-      if (animationIntervalRef.current !== null) {
-        window.clearInterval(animationIntervalRef.current);
-        animationIntervalRef.current = null;
-      }
-      setState((prev) => ({
-        ...prev,
-        shuffleCount: (prev.shuffleCount ?? 0) + 1,
-        values: finalValues,
-      }));
-      setAnimatedValues(null);
-      setIsShuffling(false);
-      animationTimeoutRef.current = null;
+      finishShuffleAnimation(finalValues);
     }, SHUFFLE_ANIMATION_MS);
+  };
+
+  const onShuffle = () => {
+    if (isShufflingRef.current || isShuffling) {
+      return;
+    }
+
+    const baseValues = state.values;
+    const baseLocks = state.locks;
+    const finalValues = shuffleSwapRows(
+      baseValues.map((pair, index) => ({ ...pair, locked: baseLocks[index] })),
+      allowEmptySwap
+    ).map(({ left, right }) => ({ left, right }));
+
+    isShufflingRef.current = true;
+    setIsShuffling(true);
+    startShuffleAnimation(baseValues, baseLocks, finalValues);
   };
 
   const onResetCount = () => {

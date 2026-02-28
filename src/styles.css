@@ -21,8 +21,8 @@
   --surface: #1a2333;
   --surface-strong: #243148;
   --text: #ebf1ff;
-  --muted: #9fb1d1;
-  --border: #334767;
+  --muted: #b2c0da;
+  --border: #435776;
   --accent: #5ea2ff;
   --accent-strong: #8ab8ff;
   --danger: #ff7d7d;
@@ -483,8 +483,9 @@ label {
   background: linear-gradient(135deg, #378fff 0%, #125fd0 100%);
   border-color: #2f7fe6;
   color: #fff;
-  width: 84px;
+  min-width: 84px;
   text-align: center;
+  white-space: nowrap;
   box-shadow: 0 8px 18px rgba(22, 119, 255, 0.26);
 }
 
