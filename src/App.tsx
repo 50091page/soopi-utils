@@ -42,6 +42,9 @@ function App() {
               />
             </span>
           </button>
+          <span className="theme-mode-hint" aria-live="polite">
+            {theme === "dark" ? "라이트모드" : "다크모드"}
+          </span>
         </div>
       </header>
 
