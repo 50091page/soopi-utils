@@ -54,11 +54,13 @@ function AppFrame() {
           </span>
         </div>
       </div>
-      <Routes>
-        <Route path="/" element={<MenuPage />} />
-        <Route path="/shuffle" element={<ShufflePage onNavigateMenu={() => navigate("/")} />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <div key={location.pathname} className="page-transition-layer page-transition-enter">
+        <Routes>
+          <Route path="/" element={<MenuPage />} />
+          <Route path="/shuffle" element={<ShufflePage onNavigateMenu={() => navigate("/")} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
     </>
   );
 }
