@@ -85,7 +85,6 @@ function MenuCardItem({ card, order, onNavigate }: MenuCardItemProps) {
         />
       ) : null}
 
-      {card.status === "comingSoon" ? <p className="menu-card-soon-text">준비중</p> : null}
     </article>
   );
 }
@@ -94,16 +93,18 @@ export function MenuPage() {
   const navigate = useNavigate();
 
   return (
-    <section className="mx-auto max-w-[980px] px-3 py-4">
-      <div className="mb-4">
-        <p className="m-0 text-xs font-semibold tracking-[0.18em] text-slate-500 dark:text-slate-500">
-          SELECT MODE
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {MENU_CARDS.map((card, index) => (
-          <MenuCardItem key={card.id} card={card} order={index + 1} onNavigate={navigate} />
-        ))}
+    <section className="mx-auto max-w-[1120px] px-3 py-4">
+      <div className="max-w-[980px]">
+        <div className="mb-4">
+          <p className="m-0 text-xs font-semibold tracking-[0.18em] text-slate-500 dark:text-slate-500">
+            SELECT MODE
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {MENU_CARDS.map((card, index) => (
+            <MenuCardItem key={card.id} card={card} order={index + 1} onNavigate={navigate} />
+          ))}
+        </div>
       </div>
     </section>
   );

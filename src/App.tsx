@@ -10,10 +10,6 @@ function AppFrame() {
   const lightModeLogoSrc = `${import.meta.env.BASE_URL}img/50091-dark.png`;
   const location = useLocation();
   const navigate = useNavigate();
-  const controlsClass =
-    location.pathname === "/shuffle"
-      ? "mx-auto max-w-[1120px]"
-      : "mx-auto max-w-[980px]";
 
   useEffect(() => {
     [darkModeLogoSrc, lightModeLogoSrc].forEach((src) => {
@@ -24,7 +20,7 @@ function AppFrame() {
 
   return (
     <>
-      <div className={`${controlsClass} app-top-controls px-3 py-2`}>
+      <div className="mx-auto mb-2 max-w-[1120px] app-top-controls px-3 pb-2 pt-4">
         <div className="theme-floating-controls">
           <button
             type="button"
