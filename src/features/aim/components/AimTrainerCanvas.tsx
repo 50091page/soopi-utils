@@ -6,6 +6,7 @@ import type { AimGameState, TargetSizeMultiplier, TargetStyleKey } from "../stor
 type AimTrainerCanvasProps = {
   width: number;
   height: number;
+  isDarkMode: boolean;
   gameState: AimGameState;
   targetDuration: number;
   targetSizeMultiplier: TargetSizeMultiplier;
@@ -77,6 +78,7 @@ function createTarget(nowMs: number, width: number, height: number, sizeMultipli
 export function AimTrainerCanvas({
   width,
   height,
+  isDarkMode,
   gameState,
   targetDuration,
   targetSizeMultiplier,
@@ -228,12 +230,17 @@ export function AimTrainerCanvas({
 
   const drawArena = useCallback(
     (graphics: PixiGraphics) => {
+      const fillColor = isDarkMode ? 0x101a2b : 0xe8f1fb;
+      const fillAlpha = isDarkMode ? 0.92 : 0.94;
+      const gridColor = isDarkMode ? 0x37516f : 0xb2c7dd;
+      const gridAlpha = isDarkMode ? 0.8 : 0.62;
+
       graphics.clear();
-      graphics.beginFill(0x101a2b, 0.92);
+      graphics.beginFill(fillColor, fillAlpha);
       graphics.drawRoundedRect(0, 0, width, height, 18);
       graphics.endFill();
 
-      graphics.lineStyle(1, 0x37516f, 0.8);
+      graphics.lineStyle(1, gridColor, gridAlpha);
       const step = 42;
       for (let x = step; x < width; x += step) {
         graphics.moveTo(x, 0);
@@ -244,7 +251,7 @@ export function AimTrainerCanvas({
         graphics.lineTo(width, y);
       }
     },
-    [height, width]
+    [height, isDarkMode, width]
   );
 
   const targetVisual = useMemo(() => {

@@ -10,6 +10,7 @@ import { useAimStore } from "../features/aim/store/useAimStore";
 
 type AimTrainerPageProps = {
   onNavigateMenu: () => void;
+  theme: "light" | "dark";
 };
 
 const TARGET_STYLE_OPTIONS: Array<{ key: TargetStyleKey; label: string; swatch: string }> = [
@@ -29,7 +30,7 @@ const MIN_FADE_SPEED_MS = 500;
 const MAX_FADE_SPEED_MS = 1000;
 const FADE_SPEED_STEP_MS = 50;
 
-export function AimTrainerPage({ onNavigateMenu }: AimTrainerPageProps) {
+export function AimTrainerPage({ onNavigateMenu, theme }: AimTrainerPageProps) {
   const arenaRef = useRef<HTMLDivElement | null>(null);
   const hitAudioRef = useRef<HTMLAudioElement | null>(null);
   const missAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -57,6 +58,8 @@ export function AimTrainerPage({ onNavigateMenu }: AimTrainerPageProps) {
   const accuracy = totalClicks > 0 ? ((totalClicks - offTargetClicks) / totalClicks) * 100 : 0;
   const accuracyText = `${accuracy.toFixed(1)}%`;
   const remainingTargets = Math.max(0, 30 - (score + misses));
+  const scoreText = String(score).padStart(2, "0");
+  const remainingText = String(remainingTargets).padStart(2, "0");
 
   const handleHit = useCallback(() => {
     registerHit();
@@ -146,6 +149,7 @@ export function AimTrainerPage({ onNavigateMenu }: AimTrainerPageProps) {
           <AimTrainerCanvas
             width={arenaSize.width}
             height={arenaSize.height}
+            isDarkMode={theme === "dark"}
             gameState={gameState}
             targetDuration={targetDuration}
             targetSizeMultiplier={targetSizeMultiplier}
@@ -155,8 +159,17 @@ export function AimTrainerPage({ onNavigateMenu }: AimTrainerPageProps) {
             onMiss={registerMiss}
             onComplete={finishGame}
           />
-          <div className="pointer-events-none absolute right-3 top-3 text-3xl font-extrabold tracking-[0.02em] text-slate-100 [text-shadow:0_2px_10px_rgba(0,0,0,0.6)]">
-            {remainingTargets}/30
+          <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2">
+            <div className="aim-top-scoreboard">
+              <p className="aim-top-scoreboard-item">
+                <span className="aim-top-scoreboard-label">점수</span>
+                <span className="aim-top-scoreboard-value">{scoreText}</span>
+              </p>
+              <p className="aim-top-scoreboard-item">
+                <span className="aim-top-scoreboard-label">남음</span>
+                <span className="aim-top-scoreboard-value">{remainingText}</span>
+              </p>
+            </div>
           </div>
           {gameState === "playing" ? (
             <div className="absolute left-3 top-3">
@@ -349,9 +362,6 @@ export function AimTrainerPage({ onNavigateMenu }: AimTrainerPageProps) {
               </a>
             </p>
           </div>
-          <span className="ml-auto text-lg font-extrabold tracking-[0.02em] text-slate-700 [text-shadow:0_1px_6px_rgba(0,0,0,0.22)] dark:text-slate-100 dark:[text-shadow:0_1px_8px_rgba(0,0,0,0.55)]">
-            SCORE {score}
-          </span>
         </div>
       </div>
       <div className="mt-3 flex justify-start">
