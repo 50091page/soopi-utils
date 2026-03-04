@@ -36,8 +36,8 @@ const MENU_CARDS: MenuCard[] = [
     tag: "MINIGAME",
     status: "active",
     tone: "aim",
-    decoImage: `${import.meta.env.BASE_URL}img/aim-image.png`,
-    decoSize: "default",
+    decoImage: `${import.meta.env.BASE_URL}img/penguin2.png`,
+    decoSize: "small",
   },
 ];
 
