@@ -1,6 +1,7 @@
 import { Container, Graphics, Stage } from "@pixi/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FederatedPointerEvent, Graphics as PixiGraphics, Rectangle } from "pixi.js";
+import { MISS_FADE_DURATION_MS, SPAWN_DURATION_MS, TARGET_RADIUS, TOTAL_TARGETS } from "../constants";
 import type { AimGameState, TargetSizeMultiplier, TargetStyleKey } from "../store/useAimStore";
 
 type AimTrainerCanvasProps = {
@@ -29,11 +30,6 @@ type TargetEntity = {
   phaseAt: number;
   wasHit: boolean;
 };
-
-const SPAWN_DURATION_MS = 180;
-const MISS_FADE_DURATION_MS = 170;
-const TARGET_RADIUS = 15;
-const TOTAL_TARGETS = 30;
 
 const TARGET_STYLE_COLORS: Record<TargetStyleKey, { inner: number; mid: number; outer: number }> = {
   ember: { inner: 0xff5c79, mid: 0xffc7d4, outer: 0xfff3f8 },
@@ -98,6 +94,7 @@ export function AimTrainerCanvas({
   const targetDurationRef = useRef(targetDuration);
   const previousGameStateRef = useRef<AimGameState>("idle");
   const pausedAtRef = useRef<number | null>(null);
+  const hitArea = useMemo(() => new Rectangle(0, 0, width, height), [width, height]);
 
   targetDurationRef.current = targetDuration;
 
@@ -161,10 +158,14 @@ export function AimTrainerCanvas({
   }, [gameState, height, targetSizeMultiplier, width]);
 
   useEffect(() => {
+    if (gameState !== "playing") {
+      return;
+    }
+
     let frameId = 0;
 
     const loop = (nowMs: number) => {
-      if (gameState === "playing" && !completedRef.current) {
+      if (!completedRef.current) {
         const current = targetRef.current;
         const isAnimating = current
           ? current.phase === "spawning" || current.phase === "hit" || current.phase === "miss"
@@ -345,7 +346,7 @@ export function AimTrainerCanvas({
           draw={drawArena}
         />
 
-        <Container interactive={true} hitArea={new Rectangle(0, 0, width, height)} pointerdown={onPointerDown} />
+        <Container interactive={true} hitArea={hitArea} pointerdown={onPointerDown} />
 
         {target && targetVisual ? (
           <Container x={target.x} y={target.y} scale={targetVisual.scale} alpha={targetVisual.alpha}>

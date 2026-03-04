@@ -1,9 +1,28 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "./hooks/useTheme";
-import { AimTrainerPage } from "./pages/AimTrainerPage";
 import { MenuPage } from "./pages/MenuPage";
-import { ShufflePage } from "./pages/ShufflePage";
+
+const ShufflePage = lazy(() => import("./pages/ShufflePage").then((module) => ({ default: module.ShufflePage })));
+const AimTrainerPage = lazy(() =>
+  import("./pages/AimTrainerPage").then((module) => ({ default: module.AimTrainerPage }))
+);
+const GA_MEASUREMENT_ID = "G-65CWGN0X87";
+
+function RoutePageViewTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window.gtag !== "function") {
+      return;
+    }
+
+    const pagePath = `${location.pathname}${location.search}${location.hash}`;
+    window.gtag("config", GA_MEASUREMENT_ID, { page_path: pagePath });
+  }, [location.hash, location.pathname, location.search]);
+
+  return null;
+}
 
 function AppFrame() {
   const { theme, toggleTheme } = useTheme();
@@ -52,15 +71,17 @@ function AppFrame() {
         </div>
       </div>
       <div key={location.pathname} className="page-transition-layer page-transition-enter">
-        <Routes>
-          <Route path="/" element={<MenuPage />} />
-          <Route path="/shuffle" element={<ShufflePage onNavigateMenu={() => navigate("/")} />} />
-          <Route
-            path="/aim-trainer"
-            element={<AimTrainerPage onNavigateMenu={() => navigate("/")} theme={theme} />}
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<div className="mx-auto max-w-[1120px] px-3 py-4 text-sm text-slate-400">Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<MenuPage />} />
+            <Route path="/shuffle" element={<ShufflePage onNavigateMenu={() => navigate("/")} />} />
+            <Route
+              path="/aim-trainer"
+              element={<AimTrainerPage onNavigateMenu={() => navigate("/")} theme={theme} />}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </div>
     </>
   );
@@ -69,6 +90,7 @@ function AppFrame() {
 function App() {
   return (
     <HashRouter>
+      <RoutePageViewTracker />
       <AppFrame />
     </HashRouter>
   );

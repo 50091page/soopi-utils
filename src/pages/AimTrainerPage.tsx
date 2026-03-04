@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BackToMenuButton } from "../components/BackToMenuButton";
+import { AimOptionsPanel } from "../features/aim/components/AimOptionsPanel";
+import { AimTopHud } from "../features/aim/components/AimTopHud";
 import { AimTrainerCanvas } from "../features/aim/components/AimTrainerCanvas";
+import {
+  MAX_TARGET_DURATION_MS,
+  MIN_TARGET_DURATION_MS,
+  TARGET_DURATION_STEP_MS,
+  TOTAL_TARGETS,
+} from "../features/aim/constants";
 import type {
-  TargetLifetimeMs,
   TargetSizeMultiplier,
   TargetStyleKey,
 } from "../features/aim/store/useAimStore";
@@ -26,9 +33,6 @@ const TARGET_SIZE_OPTIONS: Array<{ value: TargetSizeMultiplier; label: string; p
   { value: 1.5, label: "1.5x", previewPx: 22 },
   { value: 2, label: "2.0x", previewPx: 28 },
 ];
-const MIN_FADE_SPEED_MS = 500;
-const MAX_FADE_SPEED_MS = 1000;
-const FADE_SPEED_STEP_MS = 50;
 
 export function AimTrainerPage({ onNavigateMenu, theme }: AimTrainerPageProps) {
   const arenaRef = useRef<HTMLDivElement | null>(null);
@@ -53,7 +57,7 @@ export function AimTrainerPage({ onNavigateMenu, theme }: AimTrainerPageProps) {
   const setTargetSizeMultiplier = useAimStore((state) => state.setTargetSizeMultiplier);
   const setTargetLifetimeMs = useAimStore((state) => state.setTargetLifetimeMs);
   const resetGame = useAimStore((state) => state.resetGame);
-  const remainingTargets = Math.max(0, 30 - (score + misses));
+  const remainingTargets = Math.max(0, TOTAL_TARGETS - (score + misses));
   const scoreText = String(score).padStart(2, "0");
   const remainingText = String(remainingTargets).padStart(2, "0");
 
@@ -155,21 +159,7 @@ export function AimTrainerPage({ onNavigateMenu, theme }: AimTrainerPageProps) {
             onMiss={registerMiss}
             onComplete={finishGame}
           />
-          <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2">
-            <div className="aim-top-scoreboard">
-              <p className="aim-top-scoreboard-item">
-                <span className="aim-top-scoreboard-label">점수</span>
-                <span className="aim-top-scoreboard-value">{scoreText}</span>
-              </p>
-              <p className="aim-top-scoreboard-item">
-                <span className="aim-top-scoreboard-label">남음</span>
-                <span className="aim-top-scoreboard-value">{remainingText}</span>
-              </p>
-            </div>
-          </div>
-          <div className="pointer-events-none absolute bottom-3 right-3">
-            <span className="aim-speed-chip">{targetDuration}ms</span>
-          </div>
+          <AimTopHud scoreText={scoreText} remainingText={remainingText} targetDuration={targetDuration} />
           {gameState === "playing" ? (
             <div className="absolute left-3 top-3">
               <button
@@ -196,7 +186,7 @@ export function AimTrainerPage({ onNavigateMenu, theme }: AimTrainerPageProps) {
                 <button
                   type="button"
                   className="aim-arena-start-button is-pause-menu min-w-[132px]"
-                  onClick={onNavigateMenu}
+                  onClick={resetGame}
                 >
                   MENU
                 </button>
@@ -237,65 +227,22 @@ export function AimTrainerPage({ onNavigateMenu, theme }: AimTrainerPageProps) {
                   </button>
                 </div>
                 {isOptionOpen ? (
-                  <div className="pointer-events-auto aim-style-picker">
-                    <p className="aim-style-picker-title">Target Style</p>
-                    {TARGET_STYLE_OPTIONS.map((option) => (
-                      <button
-                        type="button"
-                        key={option.key}
-                        className={`aim-style-option${targetStyle === option.key ? " is-selected" : ""}`}
-                        onClick={() => {
-                          setTargetStyle(option.key);
-                          setIsOptionOpen(false);
-                        }}
-                        role="option"
-                        aria-selected={targetStyle === option.key}
-                      >
-                        <span className="aim-style-option-swatch" style={{ background: option.swatch }} />
-                        <span>{option.label}</span>
-                      </button>
-                    ))}
-
-                    <p className="aim-style-picker-title is-section-gap">Target Size</p>
-                    <div className="aim-option-row" role="listbox" aria-label="타겟 크기 선택">
-                      {TARGET_SIZE_OPTIONS.map((option) => (
-                        <button
-                          type="button"
-                          key={option.value}
-                          className={`aim-size-option${
-                            targetSizeMultiplier === option.value ? " is-selected" : ""
-                          }`}
-                          onClick={() => setTargetSizeMultiplier(option.value)}
-                          role="option"
-                          aria-selected={targetSizeMultiplier === option.value}
-                        >
-                          <span
-                            className="aim-size-option-preview"
-                            style={{ width: `${option.previewPx}px`, height: `${option.previewPx}px` }}
-                            aria-hidden="true"
-                          />
-                          <span>{option.label}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    <p className="aim-style-picker-title is-section-gap">Fade Speed</p>
-                    <div className="aim-fade-slider-wrap">
-                      <input
-                        type="range"
-                        min={MIN_FADE_SPEED_MS}
-                        max={MAX_FADE_SPEED_MS}
-                        step={FADE_SPEED_STEP_MS}
-                        value={targetDuration}
-                        className="aim-fade-slider"
-                        onChange={(event) =>
-                          setTargetLifetimeMs(Number(event.currentTarget.value) as TargetLifetimeMs)
-                        }
-                        aria-label="타겟 사라지는 속도"
-                      />
-                      <span className="aim-fade-slider-value">{targetDuration}ms</span>
-                    </div>
-                  </div>
+                  <AimOptionsPanel
+                    targetStyle={targetStyle}
+                    targetDuration={targetDuration}
+                    targetSizeMultiplier={targetSizeMultiplier}
+                    targetStyleOptions={TARGET_STYLE_OPTIONS}
+                    targetSizeOptions={TARGET_SIZE_OPTIONS}
+                    minDuration={MIN_TARGET_DURATION_MS}
+                    maxDuration={MAX_TARGET_DURATION_MS}
+                    stepDuration={TARGET_DURATION_STEP_MS}
+                    onSelectStyle={(style) => {
+                      setTargetStyle(style);
+                      setIsOptionOpen(false);
+                    }}
+                    onSelectSize={setTargetSizeMultiplier}
+                    onSelectDuration={setTargetLifetimeMs}
+                  />
                 ) : null}
               </div>
             </div>
