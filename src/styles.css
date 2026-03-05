@@ -1652,7 +1652,7 @@ label {
 .toast-notice {
   position: fixed;
   left: 50%;
-  top: 24px;
+  top: 8px;
   transform: translateX(-50%);
   background: color-mix(in srgb, var(--text) 88%, transparent);
   color: var(--surface);

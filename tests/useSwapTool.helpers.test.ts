@@ -33,7 +33,7 @@ function runMigrateStateTest() {
   assert(migrated.values[0].left === "A" && migrated.values[0].right === "B", "Valid values should be preserved.");
   assert(migrated.values[1].left === "" && migrated.values[1].right === "", "Invalid value entries should fallback.");
   assert(migrated.locks[0] === true && migrated.locks[1] === true, "Locks should be normalized to boolean.");
-  assert(migrated.shuffleCount === 7, "Shuffle count should be preserved when valid.");
+  assert(migrated.shuffleCount === 0, "Shuffle count should reset to 0 on load.");
 }
 
 function runFormatRowsForCopyTest() {

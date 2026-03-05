@@ -45,7 +45,8 @@ export function migrateSwapToolState(value: unknown, rows: string[]): SwapToolSt
       Array.isArray(raw.locks) && raw.locks.length === rows.length
         ? raw.locks.map((lock) => Boolean(lock))
         : defaults.locks,
-    shuffleCount: typeof raw.shuffleCount === "number" ? raw.shuffleCount : 0,
+    // Keep shuffle count session-scoped: always reset on page reload.
+    shuffleCount: 0,
   };
 }
 
@@ -154,7 +155,6 @@ export function useSwapTool({
     shuffleCount: state.shuffleCount ?? 0,
     isShuffling,
     toastMessage,
-    busyDurationMs: SHUFFLE_ANIMATION_MS,
     onValueChange,
     onLockChange,
     onShuffle,

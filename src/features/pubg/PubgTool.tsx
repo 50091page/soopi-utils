@@ -9,15 +9,16 @@ type PubgToolProps = {
 export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
   return (
     <SwapToolPanel
-      title="PUBG 팀 섞기"
+      title="배틀그라운드 팀 섞기"
       variant="pubg"
-      lockGuide="티어를 클릭하면 고정됩니다."
       rows={PUBG_ROWS}
       storageKey="shuffle.pubg.state.v2"
       legacyKeys={["shuffle.pubg.state", "soopi-utils.pubg.state"]}
       allowEmptySwap={allowEmptySwap}
       leftFallback="왼쪽팀"
       rightFallback="오른쪽팀"
+      leftPlaceholder="플레이어 이름"
+      rightPlaceholder="플레이어 이름"
     />
   );
 }

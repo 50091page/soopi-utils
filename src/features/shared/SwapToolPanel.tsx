@@ -4,14 +4,12 @@ import { useSwapTool } from "../../hooks/useSwapTool";
 type SwapToolPanelProps = {
   title: string;
   variant: "lol" | "pubg";
-  lockGuide: string;
   rows: string[];
   storageKey: string;
   legacyKeys: string[];
   leftFallback: string;
   rightFallback: string;
   allowEmptySwap?: boolean;
-  useTeamTint?: boolean;
   leftPlaceholder?: string;
   rightPlaceholder?: string;
 };
@@ -19,14 +17,12 @@ type SwapToolPanelProps = {
 export function SwapToolPanel({
   title,
   variant,
-  lockGuide,
   rows,
   storageKey,
   legacyKeys,
   leftFallback,
   rightFallback,
   allowEmptySwap = false,
-  useTeamTint = false,
   leftPlaceholder,
   rightPlaceholder,
 }: SwapToolPanelProps) {
@@ -36,7 +32,6 @@ export function SwapToolPanel({
     shuffleCount,
     isShuffling,
     toastMessage,
-    busyDurationMs,
     onValueChange,
     onLockChange,
     onShuffle,
@@ -57,11 +52,8 @@ export function SwapToolPanel({
       <RowSwapGrid
         title={title}
         variant={variant}
-        lockGuide={lockGuide}
         shuffleCount={shuffleCount}
         isBusy={isShuffling}
-        busyDurationMs={busyDurationMs}
-        useTeamTint={useTeamTint}
         rows={rows}
         values={values}
         locks={locks}
@@ -72,7 +64,7 @@ export function SwapToolPanel({
         onShuffle={onShuffle}
         onResetCount={onResetCount}
         onClearMembers={onClearMembers}
-        secondaryActions={[{ label: "복사하기", tone: "accent", onClick: onCopyRows }]}
+        secondaryActions={[{ label: "복사하기", icon: "copy", tone: "accent", onClick: onCopyRows }]}
       />
       {toastMessage ? (
         <div className="toast-notice" role="status" aria-live="polite">

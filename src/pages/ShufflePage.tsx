@@ -8,13 +8,13 @@ type ShufflePageProps = {
 
 export function ShufflePage({ onNavigateMenu }: ShufflePageProps) {
   return (
-    <div className="mx-auto max-w-[1120px] px-3 py-2">
-      <main className="tool-grid">
+    <div className="shv0-page">
+      <main className="shv0-grid">
         <LolTool />
         <PubgTool />
       </main>
-      <div className="mt-3 flex justify-start">
-        <BackToMenuButton onClick={onNavigateMenu} />
+      <div className="shv0-back-wrap">
+        <BackToMenuButton onClick={onNavigateMenu} className="shv0-back-btn" />
       </div>
     </div>
   );
