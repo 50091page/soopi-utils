@@ -3,12 +3,16 @@ import { useSwapTool } from "../../hooks/useSwapTool";
 
 type SwapToolPanelProps = {
   title: string;
-  variant: "lol" | "pubg";
+  variant: "lol" | "pubg" | "overwatch";
   rows: string[];
   storageKey: string;
   legacyKeys: string[];
   leftFallback: string;
   rightFallback: string;
+  copyHeader?: {
+    left: string;
+    right: string;
+  };
   allowEmptySwap?: boolean;
   leftPlaceholder?: string;
   rightPlaceholder?: string;
@@ -22,6 +26,7 @@ export function SwapToolPanel({
   legacyKeys,
   leftFallback,
   rightFallback,
+  copyHeader,
   allowEmptySwap = false,
   leftPlaceholder,
   rightPlaceholder,
@@ -45,6 +50,7 @@ export function SwapToolPanel({
     allowEmptySwap,
     leftFallback,
     rightFallback,
+    copyHeader,
   });
 
   return (

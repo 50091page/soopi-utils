@@ -17,6 +17,7 @@ export function LolTool({ allowEmptySwap = false }: LolToolProps) {
       allowEmptySwap={allowEmptySwap}
       leftFallback="블루팀"
       rightFallback="레드팀"
+      copyHeader={{ left: "블루", right: "레드" }}
       leftPlaceholder="블루팀"
       rightPlaceholder="레드팀"
     />

@@ -1,7 +1,6 @@
 import { useMemo, useRef } from "react";
 import {
   AlertTriangle,
-  ArrowLeftRight,
   Clipboard,
   Lock,
   RotateCcw,
@@ -27,6 +26,7 @@ type NameInputProps = {
   value: string;
   rowLabel: string;
   placeholder: string;
+  tone: "left" | "right" | "neutral";
   isBusy: boolean;
   isLocked: boolean;
   isDuplicate: boolean;
@@ -39,13 +39,14 @@ function NameInput({
   value,
   rowLabel,
   placeholder,
+  tone,
   isBusy,
   isLocked,
   isDuplicate,
   onChange,
   onKeyDown,
 }: NameInputProps) {
-  const stateClass = `${isDuplicate ? " is-duplicate" : value.trim() ? " is-filled" : " is-empty"}${
+  const stateClass = ` is-${tone}${isDuplicate ? " is-duplicate" : value.trim() ? " is-filled" : " is-empty"}${
     isLocked ? " is-locked" : ""
   }`;
 
@@ -66,7 +67,7 @@ function NameInput({
 
 type RowSwapGridProps = {
   title: string;
-  variant?: "lol" | "pubg";
+  variant?: "lol" | "pubg" | "overwatch";
   shuffleCount: number;
   isBusy?: boolean;
   rows: string[];
@@ -100,24 +101,20 @@ export function RowSwapGrid({
   onClearMembers,
 }: RowSwapGridProps) {
   const isLol = variant === "lol";
+  const isOverwatch = variant === "overwatch";
+  const inputTone = isLol ? undefined : "neutral";
   const lolIconSrc = `${import.meta.env.BASE_URL}img/lol.png`;
+  const overwatchIconSrc = `${import.meta.env.BASE_URL}img/overwatch.png`;
   const pubgIconSrc = `${import.meta.env.BASE_URL}img/pubg.png`;
   const shuffleLabel = isBusy ? "섞는 중..." : shuffleCount > 0 ? `섞기(${shuffleCount})` : "섞기";
 
   const normalizedCounts = useMemo(() => buildNormalizedNameCounts(values), [values]);
-
   const hasDuplicates = useMemo(() => hasDuplicateNames(normalizedCounts), [normalizedCounts]);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
-  const indexedRows = useMemo(
-    () => rows.map((row, index) => ({ label: row, index })),
-    [rows]
-  );
+  const indexedRows = useMemo(() => rows.map((row, index) => ({ label: row, index })), [rows]);
   const utilityActions = useMemo<GridAction[]>(
-    () => [
-      { label: "초기화", icon: "reset", tone: "default", onClick: onResetCount },
-      ...(secondaryActions ?? []),
-    ],
+    () => [{ label: "초기화", icon: "reset", tone: "default", onClick: onResetCount }, ...(secondaryActions ?? [])],
     [onResetCount, secondaryActions]
   );
 
@@ -130,39 +127,42 @@ export function RowSwapGrid({
   };
 
   return (
-    <section className={`shv0-card${isLol ? " is-lol" : " is-pubg"}`}>
+    <section
+      className={`shv0-card${isLol ? " is-lol" : isOverwatch ? " is-overwatch" : " is-pubg"}${
+        isBusy ? " is-busy" : ""
+      }`}
+    >
       <header className="shv0-card-header">
         <div className="shv0-card-header-left">
-          <div className="shv0-card-icon">
-            {isLol ? (
-              <img src={lolIconSrc} alt="" className="shv0-card-icon-img" />
-            ) : (
-              <img src={pubgIconSrc} alt="" className="shv0-card-icon-img shv0-card-icon-img-pubg" />
-            )}
+          <div className="shv0-card-icon-wrap">
+            <div className="shv0-card-icon">
+              {isLol ? (
+                <img src={lolIconSrc} alt="" className="shv0-card-icon-img" />
+              ) : isOverwatch ? (
+                <img src={overwatchIconSrc} alt="" className="shv0-card-icon-img shv0-card-icon-img-overwatch" />
+              ) : (
+                <img src={pubgIconSrc} alt="" className="shv0-card-icon-img shv0-card-icon-img-pubg" />
+              )}
+            </div>
           </div>
-          <h2 className="shv0-card-title">{title}</h2>
+          <div className="shv0-card-title-wrap">
+            <h2 className="shv0-card-title">{title}</h2>
+          </div>
         </div>
-        <button
-          type="button"
-          className="shv0-clear-btn"
-          onClick={onClearMembers}
-          disabled={isBusy}
-          aria-label="지우기"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="shv0-card-header-right">
+          <button
+            type="button"
+            className="shv0-clear-btn"
+            onClick={onClearMembers}
+            disabled={isBusy}
+            aria-label="지우기"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </header>
 
       <div className="shv0-card-content">
-
-        <div className="shv0-card-columns" aria-hidden="true">
-          <span className="col-role" />
-          <span className="col-lock" />
-          <span className="col-team">{isLol ? "Blue" : "Team 1"}</span>
-          <span className="col-arrow" />
-          <span className="col-team">{isLol ? "Red" : "Team 2"}</span>
-        </div>
-
         <div className="shv0-row-list">
           {indexedRows.map(({ label, index }) => {
             const left = values[index]?.left ?? "";
@@ -172,8 +172,10 @@ export function RowSwapGrid({
             const rightDup = isDuplicateName(normalizedCounts, right);
 
             return (
-              <div className={`shv0-row${locked ? " is-locked" : ""}`} key={label}>
-                <span className="shv0-role">{label}</span>
+              <div className={`shv0-row${locked ? " is-locked" : ""}${isBusy && !locked ? " is-shuffling" : ""}`} key={label}>
+                <div className="shv0-role-wrap">
+                  <span className="shv0-role">{label}</span>
+                </div>
 
                 <button
                   type="button"
@@ -197,6 +199,7 @@ export function RowSwapGrid({
                     value={left}
                     rowLabel={label}
                     placeholder={leftPlaceholder || "Player name..."}
+                    tone={inputTone ?? "left"}
                     isBusy={isBusy}
                     isLocked={locked}
                     isDuplicate={leftDup}
@@ -211,7 +214,7 @@ export function RowSwapGrid({
                   {leftDup ? <AlertTriangle className="shv0-dup-icon" size={14} /> : null}
                 </div>
 
-                <ArrowLeftRight className="shv0-arrow" size={14} />
+                <div className="shv0-divider" aria-hidden="true" />
 
                 <div className="shv0-input-wrap">
                   <NameInput
@@ -221,6 +224,7 @@ export function RowSwapGrid({
                     value={right}
                     rowLabel={label}
                     placeholder={rightPlaceholder || "Player name..."}
+                    tone={inputTone ?? "right"}
                     isBusy={isBusy}
                     isLocked={locked}
                     isDuplicate={rightDup}
@@ -242,20 +246,28 @@ export function RowSwapGrid({
         {hasDuplicates ? (
           <div className="shv0-warning">
             <AlertTriangle size={14} />
-            <span>Duplicate names detected.</span>
+            <span>같은 이름이 여러 칸에 입력되어 있습니다. 셔플 전에 한 번 더 확인하세요.</span>
           </div>
         ) : null}
       </div>
 
       <footer className="shv0-footer">
-        <button type="button" className="shv0-shuffle-btn" onClick={onShuffle} disabled={isBusy}>
-          <Shuffle size={15} />
-          {shuffleLabel}
-        </button>
+        <div className="shv0-primary-action">
+          <button
+            type="button"
+            className={`shv0-shuffle-btn${isBusy ? " is-busy" : ""}`}
+            onClick={onShuffle}
+            disabled={isBusy}
+          >
+            <Shuffle size={15} />
+            {shuffleLabel}
+          </button>
+        </div>
 
         <div className="shv0-actions">
           {utilityActions.map((action) => {
-            const icon = action.icon === "copy" ? <Clipboard size={14} /> : action.icon === "reset" ? <RotateCcw size={14} /> : null;
+            const icon =
+              action.icon === "copy" ? <Clipboard size={14} /> : action.icon === "reset" ? <RotateCcw size={14} /> : null;
 
             return (
               <button

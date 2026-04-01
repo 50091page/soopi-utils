@@ -15,8 +15,8 @@ export function PubgTool({ allowEmptySwap = false }: PubgToolProps) {
       storageKey="shuffle.pubg.state.v2"
       legacyKeys={["shuffle.pubg.state", "soopi-utils.pubg.state"]}
       allowEmptySwap={allowEmptySwap}
-      leftFallback="왼쪽팀"
-      rightFallback="오른쪽팀"
+      leftFallback="팀 1"
+      rightFallback="팀 2"
       leftPlaceholder="플레이어 이름"
       rightPlaceholder="플레이어 이름"
     />

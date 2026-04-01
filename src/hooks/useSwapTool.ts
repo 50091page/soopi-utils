@@ -18,6 +18,10 @@ type UseSwapToolOptions = {
   allowEmptySwap?: boolean;
   leftFallback: string;
   rightFallback: string;
+  copyHeader?: {
+    left: string;
+    right: string;
+  };
 };
 
 export const createDefaultSwapToolState = (rows: string[]): SwapToolState => ({
@@ -53,13 +57,23 @@ export function migrateSwapToolState(value: unknown, rows: string[]): SwapToolSt
 export function formatRowsForCopy(
   values: RowPair[],
   leftFallback: string,
-  rightFallback: string
+  rightFallback: string,
+  copyHeader?: {
+    left: string;
+    right: string;
+  }
 ) {
   const leftNames = values.map((pair) => pair.left.trim() || leftFallback);
   const rightNames = values.map((pair) => pair.right.trim() || rightFallback);
   const leftWidth = Math.max(...leftNames.map((name) => name.length));
+  const lines = leftNames.map((leftName, index) => `${leftName.padEnd(leftWidth, " ")}\t${rightNames[index]}`);
 
-  return leftNames.map((leftName, index) => `${leftName.padEnd(leftWidth, " ")}\t${rightNames[index]}`);
+  if (!copyHeader) {
+    return lines;
+  }
+
+  const headerWidth = Math.max(leftWidth, copyHeader.left.length);
+  return [`${copyHeader.left.padEnd(headerWidth, " ")}\t${copyHeader.right}`, ...lines];
 }
 
 export function useSwapTool({
@@ -69,6 +83,7 @@ export function useSwapTool({
   allowEmptySwap = false,
   leftFallback,
   rightFallback,
+  copyHeader,
 }: UseSwapToolOptions) {
   const [state, setState] = useLocalStorage<SwapToolState>(storageKey, createDefaultSwapToolState(rows), {
     legacyKeys,
@@ -137,7 +152,7 @@ export function useSwapTool({
 
   const onCopyRows = async () => {
     const copySource = animatedValues ?? state.values;
-    const lines = formatRowsForCopy(copySource, leftFallback, rightFallback);
+    const lines = formatRowsForCopy(copySource, leftFallback, rightFallback, copyHeader);
     const text = lines.join("\n");
 
     try {
