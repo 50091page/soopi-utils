@@ -1,6 +1,6 @@
 import { BackToMenuButton } from "../components/BackToMenuButton";
 import { LolTool } from "../features/lol/LolTool";
-import { OverwatchTool } from "../features/overwatch/OverwatchTool";
+import { OverwatchSection } from "../features/overwatch/OverwatchSection";
 import { PubgTool } from "../features/pubg/PubgTool";
 
 type ShufflePageProps = {
@@ -15,8 +15,8 @@ export function ShufflePage({ onNavigateMenu }: ShufflePageProps) {
           <LolTool />
           <PubgTool />
         </div>
-        <section className="shv0-full-row">
-          <OverwatchTool />
+        <section className="shv0-full-row shv0-full-row-wide">
+          <OverwatchSection />
         </section>
       </main>
       <div className="shv0-back-wrap">
