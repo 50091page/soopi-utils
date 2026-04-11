@@ -760,10 +760,10 @@
 .owm0-map-chip:hover,
 .owm0-inline-btn:hover {
   transform: translateY(-1px);
-  border-color: rgba(216, 228, 245, 0.32);
-  background: linear-gradient(180deg, rgba(34, 46, 64, 0.96), rgba(19, 28, 40, 0.98));
-  color: #ffffff;
-  box-shadow: 0 8px 16px rgba(6, 10, 18, 0.18);
+  border-color: rgba(216, 228, 245, 0.18);
+  background: linear-gradient(180deg, rgba(24, 34, 48, 0.92), rgba(15, 22, 34, 0.98));
+  color: rgba(214, 226, 243, 0.92);
+  box-shadow: 0 6px 12px rgba(6, 10, 18, 0.12);
 }
 
 .owm0-chip {
@@ -808,6 +808,15 @@
 
 .owm0-chip.is-selected .owm0-chip-label {
   color: #ffffff;
+}
+
+.owm0-chip.is-selected:hover,
+.owm0-map-chip.is-selected:hover {
+  border-color: rgba(245, 249, 255, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(244, 249, 255, 0.4),
+    0 0 0 4px rgba(208, 222, 242, 0.18),
+    0 14px 26px rgba(10, 16, 26, 0.24);
 }
 
 .owm0-helper-row {
